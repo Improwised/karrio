@@ -23,7 +23,9 @@ from karrio.mappers.ninja_van.settings import Settings
 # Initialize a carrier gateway
 ninja_van = karrio.gateway["ninja_van"].create(
     Settings(
-        ...
+        client_id: str = None
+        client_secret: str = None
+        grant_type: str = "client_credentials"
     )
 )
 ```

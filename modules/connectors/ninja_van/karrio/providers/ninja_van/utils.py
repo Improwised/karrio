@@ -1,5 +1,4 @@
 
-import urllib.parse
 import datetime
 import karrio.core as core
 import karrio.core.errors as errors
@@ -58,7 +57,7 @@ class Settings(core.Settings):
         return new_auth["access_token"]
 
 
-    def login(settings: Settings, client_id: str = None, client_secret: str = None, grant_type: str = None):
+    def login(settings: core.Settings, client_id: str = None, client_secret: str = None, grant_type: str = None):
         import karrio.providers.ninja_van.error as error
         result = lib.request(
             url=f"{settings.server_url}/2.0/oauth/access_token",
