@@ -2469,6 +2469,14 @@ export const GET_USER_CONNECTIONS = gql`
         account_country_code
         api_key
       }
+      ... on NinjaVanSettingsType {
+        id
+        client_id
+        client_secret
+        grant_type
+        metadata
+        config
+      }
     }
   }
 `;
