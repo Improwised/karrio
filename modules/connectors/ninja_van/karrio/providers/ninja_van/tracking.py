@@ -6,7 +6,8 @@ import karrio.core.models as models
 import karrio.providers.ninja_van.error as error
 import karrio.providers.ninja_van.utils as provider_utils
 import karrio.providers.ninja_van.units as provider_units
-
+import karrio.schemas.ninja_van.tracking_request as ninja_van
+import karrio.schemas.ninja_van.tracking_response as tracking
 
 def parse_tracking_response(
     _response: lib.Deserializable[typing.List[typing.Tuple[str, dict]]],
@@ -29,6 +30,7 @@ def parse_tracking_response(
 def _extract_details(
     data: dict,
     settings: provider_utils.Settings,
+        ctx: dict
 ) -> models.TrackingDetails:
     details = None  # parse carrier tracking object type
 
@@ -57,6 +59,6 @@ def tracking_request(
 ) -> lib.Serializable:
 
     # map data to convert karrio model to ninja_van specific type
-    request = None
+    request = [ninja_van.TrackingRequestType(tracking_number=tn) for tn in payload.tracking_numbers]
 
     return lib.Serializable(request, lib.to_dict)
