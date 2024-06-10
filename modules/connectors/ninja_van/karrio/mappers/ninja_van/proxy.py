@@ -10,7 +10,7 @@ class Proxy(proxy.Proxy):
 
     def get_rates(self, request: lib.Serializable) -> lib.Deserializable[str]:
         response = lib.request(
-            url=f"{self.settings.server_url}/{self.settings.country_code}/1.0/public/price",
+            url=f"{self.settings.server_url}/{self.settings.account_country_code}/1.0/public/price",
             data=lib.to_json(request.serialize()),
             trace=self.trace_as("json"),
             method="POST",
@@ -25,7 +25,7 @@ class Proxy(proxy.Proxy):
 
     def create_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
         response = lib.request(
-            url=f"{self.settings.server_url}/{self.settings.country_code}/4.2/orders",
+            url=f"{self.settings.server_url}/{self.settings.account_country_code}/4.2/orders",
             data=lib.to_json(request.serialize()),
             trace=self.trace_as("json"),
             method="POST",
@@ -40,13 +40,12 @@ class Proxy(proxy.Proxy):
 
     def cancel_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
         payload = request.serialize()
-        tracking_numbers = payload.get('tracking_numbers', [])
-        tracking_number = "&".join([f"tracking_number={tn}" for tn in tracking_numbers])
+        tracking_number = payload.get('tracking_number')
         response = lib.run_asynchronously(
             lambda payload: (
                 payload["id"],
                 lib.request(
-                    url=f"{self.settings.server_url}/{self.settings.country_code}/2.2/orders/{tracking_number}",
+                    url=f"{self.settings.server_url}/{self.settings.account_country_code}/2.2/orders/{tracking_number}",
                     trace=self.trace_as("json"),
                     method="DELETE",
                     headers={
@@ -69,7 +68,7 @@ class Proxy(proxy.Proxy):
         tracking_numbers = payload.get('tracking_numbers', [])
         tracking_number = "&".join([f"tracking_number={tn}" for tn in tracking_numbers])
         response = lib.request(
-            url=f"{self.settings.server_url}/{self.settings.country_code}/1.0/orders/tracking-events/{tracking_number}",
+            url=f"{self.settings.server_url}/{self.settings.account_country_code}/1.0/orders/tracking-events?{tracking_number}",
             data=lib.to_json(request.serialize()),
             trace=self.trace_as("json"),
             method="GET",

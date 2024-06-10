@@ -58,21 +58,21 @@ class Settings(core.Settings):
         return new_auth["access_token"]
 
 
-    def login(settings: Settings, client_id: str = None, client_secret: str = None, grant_type: str = None):
-        import karrio.providers.ninja_van.error as error
-        result = lib.request(
-            url=f"{settings.server_url}/2.0/oauth/access_token",
-            method="POST",
-            headers={
-                "content-Type": "application/json",
-            },
-            data=lib.to_json({"client_id": client_id, "client_secret": client_secret, "grant_type": grant_type}),
-        )
-        response = lib.to_dict(result)
-        messages = error.parse_error_response(response, settings)
-        if any(messages):
-            raise errors.ShippingSDKError(messages)
-        expiry = datetime.datetime.now() + datetime.timedelta(
-            seconds=float(response.get("expires_in", 0))
-        )
-        return {**response, "expiry": lib.fdatetime(expiry)}
+def login(settings: Settings, client_id: str = None, client_secret: str = None, grant_type: str = None):
+    import karrio.providers.ninja_van.error as error
+    result = lib.request(
+        url=f"{settings.server_url}/{settings.account_country_code}/2.0/oauth/access_token",
+        method="POST",
+        headers={
+            "content-Type": "application/json",
+        },
+        data=lib.to_json({"client_id": client_id, "client_secret": client_secret, "grant_type": grant_type}),
+    )
+    response = lib.to_dict(result)
+    messages = error.parse_error_response(response, settings)
+    if any(messages):
+        raise errors.ShippingSDKError(messages)
+    expiry = datetime.datetime.now() + datetime.timedelta(
+        seconds=float(response.get("expires_in", 0))
+    )
+    return {**response, "expiry": lib.fdatetime(expiry)}

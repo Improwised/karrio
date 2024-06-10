@@ -17,6 +17,6 @@ class Settings(provider_utils.Settings):
     id: str = None
     test_mode: bool = False
     carrier_id: str = "ninja_van"
-    country_code: str = "SG"
+    account_country_code: str = "SG"
     metadata: dict = {}
     config: dict = {}
