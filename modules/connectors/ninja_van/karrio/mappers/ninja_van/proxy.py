@@ -65,17 +65,6 @@ class Proxy(proxy.Proxy):
         )
 
     def get_tracking(self, request: lib.Serializable) -> lib.Deserializable[str]:
-        response = lib.request(
-            data=lib.to_json(request.serialize()),
-            trace=self.trace_as("json"),
-            method="GET",
-             headers={
-                "Accept": "application/json",
-                "Content-type": "application/json",
-                "Authorization": f"Bearer {self.settings.access_token}",
-            },
-        )
-    def get_tracking(self, request: lib.Serializable) -> lib.Deserializable[str]:
         payload = request.serialize()
         tracking_numbers = payload.get('tracking_numbers', [])
         tracking_number = "&".join([f"tracking_number={tn}" for tn in tracking_numbers])
