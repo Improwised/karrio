@@ -30,27 +30,51 @@ def parse_tracking_response(
 def _extract_details(
     data: dict,
     settings: provider_utils.Settings,
-        ctx: dict
+    ctx: dict
 ) -> models.TrackingDetails:
-    details = None  # parse carrier tracking object type
-
+    tracking_number = ctx.get("tracking_number")
+    details = lib.to_object(tracking.TrackingResponseType, data)
+    events = reversed(details.tracking_events)
+    estimated_delivery = (
+        details.scheduling.estimated_delivery_date_minimum
+        or details.scheduling.estimated_delivery_date_maximum
+        or details.scheduling.delivered_on
+    )
+    status = next(
+        (
+            status.name
+            for status in list(provider_units.TrackingStatus)
+            if details.state in status.value
+        ),
+        provider_units.TrackingStatus.in_transit.name,
+    )
     return models.TrackingDetails(
         carrier_id=settings.carrier_id,
         carrier_name=settings.carrier_name,
-        tracking_number="",
+        tracking_number=tracking_number,
         events=[
             models.TrackingEvent(
-                date=lib.fdate(""),
-                description="",
-                code="",
-                time=lib.ftime(""),
+                date=lib.fdatetime(
+                   event.timestamp or event.scan_time,
+                    try_formats=["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ"],
+                    output_format="%Y-%m-%d",
+                ),
+                description=event.arrivedatoriginhubinformation,
                 location="",
+                code=event.shipper_order_ref_no,
+                time=lib.fdatetime(
+                    event.timestamp or event.scan_time,
+                    try_formats=["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ"],
+                    output_format="%H:%M",
+                ),
             )
-            for event in []
+            for event in events
         ],
-        estimated_delivery=lib.fdate(""),
-        delivered=False,
+        estimated_delivery=lib.fdate(estimated_delivery, "%Y-%m-%d"),
+        delivered=status == provider_units.TrackingStatus.delivered.name,
+        status=status,
     )
+
 
 
 def tracking_request(
