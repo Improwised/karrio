@@ -83,13 +83,13 @@ def shipment_request(
 
     # map data to convert karrio model to ninja_van specific type
     request = ninja_van.CreateShipmentRequestType(
-        servicetype=service,
+        service_type=service,
         service_level=options.service_level.state,
         requested_tracking_number=payload.reference,
         reference=ninja_van.ReferenceType(
             merchant_order_number=payload.reference
         ),
-        create_shipment_request_from=ninja_van.FromType(
+        from=ninja_van.FromType(
             name=shipper.person_name,
             phone_number=shipper.phone,
             email=shipper.email,
