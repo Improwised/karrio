@@ -1,5 +1,4 @@
 
-import urllib.parse
 import datetime
 import karrio.core as core
 import karrio.core.errors as errors

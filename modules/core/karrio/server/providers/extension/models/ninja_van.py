@@ -8,9 +8,9 @@ class NinjaVanSettings(providers.Carrier):
        verbose_name = "NinjaVan Settings"
        verbose_name_plural = "NinjaVan Settings"
 
-       client_id = models.CharField(max_length=255, null=True, blank=True)
-       client_secret = models.CharField(max_length=255, null=True, blank=True)
-       grant_type = models.CharField(max_length=255, default="client_credentials")
+   client_id = models.CharField(max_length=255, null=False, blank=False)
+   client_secret = models.CharField(max_length=255, null=False, blank=False)
+   grant_type = models.CharField(max_length=255, default="client_credentials")
 
    @property
    def carrier_name(self) -> str:
