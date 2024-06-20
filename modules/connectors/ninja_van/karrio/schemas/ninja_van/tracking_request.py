@@ -19,4 +19,5 @@ class TrackingInfoType:
 
 @s(auto_attribs=True)
 class TrackingRequestType:
-    tracking_number: Optional[str] = None
+    includeDetailedScans: Optional[bool] = None
+    trackingInfo: List[TrackingInfoType] = JList[TrackingInfoType]

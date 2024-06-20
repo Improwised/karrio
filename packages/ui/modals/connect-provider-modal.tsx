@@ -1782,10 +1782,11 @@ function fieldState(carrier_name: CarrierNameType, property: string) {
           ["account_country_code"],
         ],
         [CarrierSettingsCarrierNameEnum.NinjaVan]: [
+          ["carrier_id", true],
           ["client_id", true],
           ["client_secret", true],
-          ["grant_type", true],
-          ["country_code"],
+          ["grant_type", false],
+          ["account_country_code"],
         ],
         [NoneEnum.none]: [],
       }[carrier_name] || []

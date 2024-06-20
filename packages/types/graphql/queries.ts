@@ -2471,8 +2471,10 @@ export const GET_USER_CONNECTIONS = gql`
       }
       ... on NinjaVanSettingsType {
         id
+        carrier_id
         client_id
         client_secret
+        account_country_code
         grant_type
         metadata
         config

@@ -3253,6 +3253,7 @@ export interface get_user_connections_user_connections_Zoom2uSettingsType {
 export interface get_user_connections_user_connections_NinjaVanSettingsType {
   __typename: "NinjaVanSettingsType";
   id: string;
+  carrier_id: string;
   client_id: string | null;
   client_secret: string | null;
   grant_type: string | null;
