@@ -56,11 +56,11 @@ def _extract_details(
         carrier_name=settings.carrier_name,
         tracking_number=order.tracking_number,
         shipment_identifier=order.requested_tracking_number,  # extract shipment identifier from shipment
-        service_type=order.service_type
+        service_type=order.service_type,
         items=[order.items],
         meta=dict(
             reference=order.reference,
-            order_from=order.from,
+            order_from=order.create_shipment_request_from,
             order_to=order.to,
             order_parcel_job=order.parcel_job,
             tracking_number=order.tracking_number,
@@ -89,7 +89,7 @@ def shipment_request(
         reference=ninja_van.ReferenceType(
             merchant_order_number=payload.reference
         ),
-        from=ninja_van.FromType(
+        create_shipment_request_from=ninja_van.FromType(
             name=shipper.person_name,
             phone_number=shipper.phone,
             email=shipper.email,
