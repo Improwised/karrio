@@ -1,4 +1,4 @@
-from attr import s
+from attr import s, field
 from typing import Optional, List
 from jstruct import JStruct, JList
 
@@ -50,7 +50,7 @@ class ParcelJobType:
     pickup_service_level: Optional[str] = None
     pickup_date: Optional[str] = None
     pickup_timeslot: Optional[TimeslotType] = JStruct[TimeslotType]
-    pickupi_nstructions: Optional[str] = None
+    pickup_instructions: Optional[str] = None
     delivery_instructions: Optional[str] = None
     delivery_startdate: Optional[str] = None
     delivery_timeslot: Optional[TimeslotType] = JStruct[TimeslotType]
@@ -69,6 +69,6 @@ class CreateShipmentRequestType:
     service_level: Optional[str] = None
     requested_tracking_number: Optional[str] = None
     reference: Optional[ReferenceType] = JStruct[ReferenceType]
-    create_shipment_request_from: Optional[FromType] = JStruct[FromType]
-    to: Optional[FromType] = JStruct[FromType]
+    from_address: Optional[FromType] = field(default=None)
+    to: Optional[FromType] = field(default=None)
     parcel_job: Optional[ParcelJobType] = JStruct[ParcelJobType]

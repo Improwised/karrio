@@ -1,4 +1,5 @@
-
+import karrio.schemas.ninja_van.rate_request as ninja_van
+import karrio.schemas.ninja_van.rate_response as rating
 import typing
 import karrio.lib as lib
 import karrio.core.units as units
@@ -13,29 +14,25 @@ def parse_rate_response(
     settings: provider_utils.Settings,
 ) -> typing.Tuple[typing.List[models.RateDetails], typing.List[models.Message]]:
     response = _response.deserialize()
-
     messages = error.parse_error_response(response, settings)
-    rates = [_extract_details(rate, settings) for rate in response]
+    rates = [_extract_details(response.get("data"), settings)]
 
-    return rates, messages
+    return rates,messages
 
 
 def _extract_details(
     data: dict,
     settings: provider_utils.Settings,
 ) -> models.RateDetails:
-    rate = None  # parse carrier rate type
+
+    rate = lib.to_object(rating.RateResponseType, data)
+    total_charge = lib.to_money(rate.data.total_fee) if rate.data and rate.data.total_fee else 0.0
 
     return models.RateDetails(
         carrier_id=settings.carrier_id,
         carrier_name=settings.carrier_name,
-        service="",  # extract service from rate
-        total_charge=lib.to_money(0.0),  # extract the rate total rate cost
-        currency="",  # extract the rate pricing currency
-        transit_days=0,  # extract the rate transit days
-        meta=dict(
-            service_name="",  # extract the rate service human readable name
-        ),
+        total_charge=total_charge,
+        service="Standard",
     )
 
 
@@ -46,13 +43,18 @@ def rate_request(
     shipper = lib.to_address(payload.shipper)
     recipient = lib.to_address(payload.recipient)
     packages = lib.to_packages(payload.parcels)
-    services = lib.to_services(payload.services, provider_units.ShippingService)
-    options = lib.to_shipping_options(
-        payload.options,
-        package_options=packages.options,
-    )
 
-    # map data to convert karrio model to ninja_van specific type
-    request = None
+    request = ninja_van.RateRequestType(
+        weight=packages.weight.KG,
+        service_level="Standard",
+        rate_request_from=ninja_van.FromType(
+            l1_tier_code=shipper.address_line1,
+            l2_tier_code=shipper.address_line2,
+        ),
+        rate_request_to=ninja_van.FromType(
+            l1_tier_code=recipient.address_line1,
+            l2_tier_code=recipient.address_line2,
+        )
+    )
 
     return lib.Serializable(request, lib.to_dict)

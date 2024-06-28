@@ -10,12 +10,12 @@ import karrio.schemas.ninja_van.create_shipment_request as ninja_van
 import karrio.schemas.ninja_van.create_shipment_response as shipping
 
 
+
 def parse_shipment_response(
     _responses: lib.Deserializable[dict],
     settings: provider_utils.Settings,
 ) -> typing.Tuple[typing.List[models.RateDetails], typing.List[models.Message]]:
     responses = _responses.deserialize()
-
     shipment = lib.to_multi_piece_shipment(
         [
             (
@@ -45,7 +45,7 @@ def _extract_details(
     data: typing.Tuple[dict, dict],
     settings: provider_utils.Settings,
 ) -> models.ShipmentDetails:
-    details, label = data
+    details = data
 
     order: shipping.OrderResponseType = lib.to_object(
         shipping.OrderResponseType, details
@@ -80,18 +80,17 @@ def shipment_request(
         payload.options,
         package_options=packages.options,
     )
-
     # map data to convert karrio model to ninja_van specific type
-    request = ninja_van.CreateShipmentRequestType(
-        service_type=service,
-        service_level=options.service_level.state,
+    request = dict(
+        service_type="Parcel",
+        service_level=service,
         requested_tracking_number=payload.reference,
         reference=ninja_van.ReferenceType(
             merchant_order_number=payload.reference
         ),
-        create_shipment_request_from=ninja_van.FromType(
+        address_from=ninja_van.FromType(
             name=shipper.person_name,
-            phone_number=shipper.phone,
+            phone_number=shipper.phone_number,
             email=shipper.email,
             address=ninja_van.AddressType(
                 address1=shipper.address_line1,
@@ -100,12 +99,12 @@ def shipment_request(
                 city=shipper.city,
                 state=shipper.state_code,
                 country=shipper.country_code,
-                postcode=shipper.postal_code,
+                post_code=shipper.postal_code,
             ),
         ),
         to=ninja_van.FromType(
             name=recipient.person_name,
-            phone_number=recipient.phone,
+            phone_number=recipient.phone_number,
             email=recipient.email,
             address=ninja_van.AddressType(
                 address1=recipient.address_line1,
@@ -114,27 +113,27 @@ def shipment_request(
                 city=recipient.city,
                 state=recipient.state_code,
                 country=recipient.country_code,
-                postcode=recipient.postal_code,
+                post_code=recipient.postal_code,
             ),
         ),
-        parceljob=ninja_van.ParcelJobType(
-            ispickuprequired=options.is_pickup_required.state,
+        parcel_job=ninja_van.ParcelJobType(
+            is_pickup_required=payload.metadata.get("is_pickup_required", False),
             pickup_addressid=None,
-            pickup_service_type=None,
-            pickup_service_level=None,
-            pickup_date=options.pickup_date.state,
-            pickup_time_slot=ninja_van.TimeslotType(
-                start_time=options.pickup_start_time.state,
-                end_time=options.pickup_end_time.state,
-                time_zone=options.pickup_timezone.state,
+            pickup_service_type="Scheduled",
+            pickup_service_level="Standard",
+            pickup_date=payload.metadata.get("pickup_date", None),
+            pickup_timeslot=ninja_van.TimeslotType(
+                start_time=payload.metadata.get("pickup_timeslot", {}).get("start_time", None),
+                end_time=payload.metadata.get("pickup_timeslot", {}).get("end_time", None),
+                timezone=payload.metadata.get("pickup_timeslot", {}).get("timezone", None),
             ),
             pickup_instructions=options.pickup_instructions.state,
             delivery_instructions=options.delivery_instructions.state,
-            delivery_startdate=options.delivery_start_date.state,
+            delivery_startdate= payload.metadata.get("delivery_startdate", None),
             delivery_timeslot=ninja_van.TimeslotType(
-                start_time=options.delivery_start_time.state,
-                end_time=options.delivery_end_time.state,
-                time_zone=options.delivery_timezone.state,
+                start_time=payload.metadata.get("delivery_timeslot", {}).get("start_time", None),
+                end_time=payload.metadata.get("delivery_timeslot", {}).get("end_time", None),
+                timezone=payload.metadata.get("delivery_timeslot", {}).get("timezone", None),
             ),
             dimensions=ninja_van.DimensionsType(
                 weight=packages.weight.KG,
@@ -143,11 +142,18 @@ def shipment_request(
                 ninja_van.ItemType(
                     item_description=item.description,
                     quantity=item.quantity,
-                    is_dangerous_good=item.is_dangerous_good,
+                    is_dangerous_good=payload.metadata.get("is_dangerous_good", False),
                 )
                 for item in packages.items
             ],
         )
     )
 
-    return lib.Serializable(request, lib.to_dict)
+    # Custom serialization function
+    def custom_serializer(_):
+        serialized = lib.to_dict(_)
+        if 'address_from' in serialized:
+            serialized['from'] = serialized.pop('address_from')
+        return serialized
+
+    return lib.Serializable(request, custom_serializer)
