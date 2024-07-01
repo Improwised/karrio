@@ -1781,6 +1781,13 @@ function fieldState(carrier_name: CarrierNameType, property: string) {
           ["api_key", true],
           ["account_country_code"],
         ],
+        [CarrierSettingsCarrierNameEnum.NinjaVan]: [
+          ["carrier_id", true],
+          ["client_id", true],
+          ["client_secret", true],
+          ["grant_type", false],
+          ["account_country_code"],
+        ],
         [NoneEnum.none]: [],
       }[carrier_name] || []
     ).find(([_, ...__]) => _ === property) || [];
@@ -1801,4 +1808,3 @@ function fieldState(carrier_name: CarrierNameType, property: string) {
 export function useConnectCarrierModal() {
   return useContext(ConnectProviderModalContext);
 }
-
