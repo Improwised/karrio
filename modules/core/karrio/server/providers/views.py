@@ -1,6 +1,9 @@
 import io
 import base64
 import logging
+import hmac
+import hashlib
+import json
 from django.conf import settings
 from rest_framework import status
 from django.http import JsonResponse
@@ -10,6 +13,9 @@ from rest_framework.response import Response
 from django.core.files.base import ContentFile
 from django_downloadview import VirtualDownloadView
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.decorators import api_view
+from .serializers import WebhookPayloadSerializer
+import requests
 
 import karrio.server.openapi as openapi
 import karrio.server.core.filters as filters
@@ -194,3 +200,27 @@ if settings.CUSTOM_CARRIER_DEFINITION:
             name="carrier-label",
         )
     )
+
+@api_view(['POST'])
+def test_ninjavan_webhook(request):
+    serializer = WebhookPayloadSerializer(data=request.data)
+
+    if serializer.is_valid():
+        print("++++++++++++++++++++", serializer.validated_data)
+
+        # Extract shipper_name from query parameters, with a default value
+        shipper_name = request.GET.get('shipper_name', 'default_shipper')
+
+        # Append shipper_name to the validated data payload
+        payload_with_shipper = serializer.validated_data.copy()
+        payload_with_shipper['shipper_name'] = shipper_name
+
+        forward_url = 'http://127.0.0.1:5000/pos'
+        response = requests.post(forward_url, json=payload_with_shipper)
+
+        if response.status_code == 200:
+            return Response({"status": "received"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
