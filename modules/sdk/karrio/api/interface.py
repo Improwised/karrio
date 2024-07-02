@@ -287,7 +287,6 @@ class Rating:
         Returns:
             IRequestFromMany: a lazy request dataclass instance
         """
-        logger.debug(f"fetch shipment rates. payload: {lib.to_json(args)}")
         payload = lib.to_object(models.RateRequest, lib.to_dict(args))
 
         def action(gateways: typing.List[gateway.Gateway]):
@@ -301,12 +300,15 @@ class Rating:
                     return abortion
 
                 request: lib.Serializable = gateway.mapper.create_rate_request(payload)
+                logger.debug("================================= INTER", request)
                 response: lib.Deserializable = gateway.proxy.get_rates(request)
+                logger.debug("================================= OUT", response)
 
                 @fail_safe(gateway)
                 def deserialize():
                     return gateway.mapper.parse_rate_response(response)
 
+                logger.debug("================================= DESERIALIZE")
                 return IDeserialize(deserialize)
 
             deserializable_collection: typing.List[IDeserialize] = (
@@ -360,7 +362,6 @@ class Shipment:
         Returns:
             IRequestWith: a lazy request dataclass instance
         """
-        logger.debug(f"create a shipment. payload: {lib.to_json(args)}")
         payload = lib.to_object(models.ShipmentRequest, lib.to_dict(args))
 
         def action(gateway: gateway.Gateway):
@@ -518,6 +519,37 @@ class Manifest:
             @fail_safe(gateway)
             def deserialize():
                 return gateway.mapper.parse_manifest_response(response)
+
+            return IDeserialize(deserialize)
+
+        return IRequestFrom(action)
+
+class Webhook:
+    """The unified Webhook API fluent interface"""
+
+    @staticmethod
+    def listen(args: typing.Union[models.WebhookListener, dict]) -> IRequestFrom:
+        """Listen to a webhook event from a carrier
+
+        Args:
+            args (Union[WebhookRequest, dict]): the webhook request payload
+
+        Returns:
+            IRequestFrom: a lazy request dataclass instance
+        """
+        logger.debug(f"listen to a webhook. payload: {lib.to_json(args)}")
+        payload = lib.to_object(models.WebhookListener, lib.to_dict(args))
+
+        def action(gateway: gateway.Gateway):
+            is_valid, abortion = check_operation(gateway, "webhook_listener")
+            if not is_valid:
+                return abortion
+
+            response: lib.Deserializable = gateway.proxy.webhook_listener(payload)
+
+            @fail_safe(gateway)
+            def deserialize():
+                return gateway.mapper.parse_webhook_response(response)
 
             return IDeserialize(deserialize)
 

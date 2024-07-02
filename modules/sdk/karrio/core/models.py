@@ -539,3 +539,14 @@ class DocumentUploadDetails:
     documents: List[DocumentDetails] = JList[DocumentDetails]
     meta: dict = None
     id: str = None
+
+@attr.s(auto_attribs=True)
+class WebhookListener:
+    """Karrio unified webhook event data type."""
+
+    carrier_id: str
+    carrier_name: str
+    status: str = None
+    meta: dict = None
+    error: str = None
+    message: str = None
