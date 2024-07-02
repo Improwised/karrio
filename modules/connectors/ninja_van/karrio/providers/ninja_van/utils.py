@@ -20,7 +20,7 @@ class Settings(core.Settings):
         return (
             "https://api-sandbox.ninjavan.co"
             if self.test_mode
-            else "https://api.ninjavan.co"
+            else "https://api-sandbox.ninjavan.co" #"https://api.ninjavan.co" updATE later
         )
 
     @property
@@ -67,6 +67,7 @@ def login(settings: Settings, client_id: str = None, client_secret: str = None, 
         },
         data=lib.to_json({"client_id": client_id, "client_secret": client_secret, "grant_type": grant_type}),
     )
+    print ("====================================",client_id, "===", client_secret,settings.server_url, lib.to_dict(result) )
     response = lib.to_dict(result)
     messages = error.parse_error_response(response, settings)
     if any(messages):
