@@ -112,6 +112,6 @@ class Proxy(proxy.Proxy):
         else:
             raise ValueError("Failed to retrieve PDF")
 
-    def webhook_listener(self, request: lib.Serializable) -> Deserializable:
+    def webhook_listener(self, request: lib.Serializable) -> lib.Deserializable[str]:
         print("Webhook received")
         return lib.Deserializable(request.serialize(), lib.to_dict)

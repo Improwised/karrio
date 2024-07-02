@@ -350,7 +350,82 @@ class TrackerDocs(django_downloadview.VirtualDownloadView):
 
         return ContentFile(buffer.getvalue(), name=self.name)
 
+class TrackerWebhookListener(APIView):
+    # throttle_scope = "carrier_webhook"
 
+    # @openapi.extend_schema(
+    #     tags=["Trackers"],
+    #     operation_id=f"{ENDPOINT_ID}webhook",
+    #     extensions={"x-operationId": "trackerWebhook"},
+    #     summary="Tracker status webhook listener",
+    #     request=serializers.WebhookPayload(),
+    #     responses={
+    #         200: serializers.SuccessResponse(),
+    #         400: serializers.ErrorResponse(),
+    #         500: serializers.ErrorResponse(),
+    #     },
+    # )
+    def post(self, request: Request):
+        """
+        Receive and process tracker status updates from carrier webhooks.
+        """
+        print("Received webhook payload:", request.data)  # Debug log
+
+        return Response(
+                {"message": "Webhook processed successfully"},
+                status=status.HTTP_200_OK,
+        )
+        # serializer = serializers.WebhookPayload(data=request.data)
+        # if not serializer.is_valid():
+        #     print("Invalid webhook payload:", serializer.errors)  # Debug log
+        #     return Response(
+        #         {"error": "Invalid payload", "details": serializer.errors},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
+
+        # try:
+        #     tracking_number = serializer.validated_data.get('tracking_number')
+        #     new_status = serializer.validated_data.get('status')
+
+        #     print(f"Processing update for tracking number: {tracking_number}")  # Debug log
+        #     print(f"New status: {new_status}")  # Debug log
+
+        #     # Find the corresponding tracker
+        #     tracker = models.Tracking.objects.filter(tracking_number=tracking_number).first()
+
+        #     if not tracker:
+        #         print(f"Tracker not found for tracking number: {tracking_number}")  # Debug log
+        #         return Response(
+        #             {"error": "Tracker not found"},
+        #             status=status.HTTP_404_NOT_FOUND,
+        #         )
+
+        #     # Update the tracker status
+        #     tracker.status = new_status
+        #     tracker.save()
+
+        #     print(f"Successfully updated tracker status for {tracking_number}")  # Debug log
+
+        #     return Response(
+        #         {"message": "Webhook processed successfully"},
+        #         status=status.HTTP_200_OK,
+        #     )
+
+        # except Exception as e:
+        #     print(f"Error processing webhook: {str(e)}")  # Debug log
+        #     return Response(
+        #         {"error": "Internal server error", "details": str(e)},
+        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     )
+
+
+router.urls.append(
+    path(
+        "trackers/webhook",
+        TrackerWebhookListener.as_view(),
+        name="tracker-webhook",
+    )
+)
 router.urls.append(path("trackers", TrackerList.as_view(), name="trackers-list"))
 router.urls.append(
     path(

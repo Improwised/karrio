@@ -11,6 +11,7 @@ from karrio.server.core.serializers import (
     ShipmentStatus,
     TrackerStatus,
     TrackingInfo,
+    WebhookPayload,
 )
 
 import karrio.server.manager.models as models
