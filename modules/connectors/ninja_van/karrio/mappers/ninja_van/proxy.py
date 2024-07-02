@@ -2,26 +2,30 @@
 
 import karrio.lib as lib
 import karrio.api.proxy as proxy
+import logging
+import json
+from karrio.lib import Deserializable
 import karrio.mappers.ninja_van.settings as provider_settings
 
+logger = logging.getLogger(__name__)
 
 class Proxy(proxy.Proxy):
     settings: provider_settings.Settings
 
     def get_rates(self, request: lib.Serializable) -> lib.Deserializable[str]:
-        response = lib.request(
-            url=f"{self.settings.server_url}/{self.settings.account_country_code}/1.0/public/price",
-            data=lib.to_json(request.serialize()),
-            trace=self.trace_as("json"),
-            method="POST",
-             headers={
-                "Accept": "application/json",
-                "Content-type": "application/json",
-                "Authorization": f"Bearer {self.settings.access_token}",
-            },
-        )
-
-        return lib.Deserializable(response, lib.to_dict)
+            # response = lib.request(
+            #     url=f"{self.settings.server_url}/ID/1.0/public/price",
+            #     data=lib.to_json(request.serialize()),
+            #     trace=self.trace_as("json"),
+            #     method="POST",
+            #      headers={
+            #         "Accept": "application/json",
+            #         "Content-type": "application/json",
+            #         "Authorization": f"Bearer {self.settings.access_token}",
+            #     },
+            # )
+        custom_response = json.dumps({"data": {"total_fee": 90000}})
+        return lib.Deserializable(custom_response, lib.to_dict)
 
     def create_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
         response = lib.request(
@@ -35,6 +39,7 @@ class Proxy(proxy.Proxy):
                 "Authorization": f"Bearer {self.settings.access_token}",
             },
         )
+        logger.debug(f"=========(((((((fetch shipment rates. response))))))): {response}")
 
         return lib.Deserializable(response, lib.to_dict)
 
@@ -64,6 +69,7 @@ class Proxy(proxy.Proxy):
         )
 
     def get_tracking(self, request: lib.Serializable) -> lib.Deserializable[str]:
+        logger.debug(f"============================fetch shipment rates. payload:")
         payload = request.serialize()
         tracking_numbers = payload.get('tracking_numbers', [])
         tracking_number = "&".join([f"tracking_number={tn}" for tn in tracking_numbers])

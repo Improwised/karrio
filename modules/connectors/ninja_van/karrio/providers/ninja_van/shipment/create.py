@@ -18,6 +18,7 @@ def parse_shipment_response(
     response = _response.deserialize()
     messages = error.parse_error_response(response, settings)
     shipment = _extract_details(response, settings) if len(messages) == 0 else None
+    print("************RESPONSES******************", response, shipment)
 
     return shipment, messages
 
@@ -27,6 +28,10 @@ def _extract_details(
     settings: provider_utils.Settings,
 ) -> models.ShipmentDetails:
     details = data
+    print("************DETAILS******************", details)
+    order: shipping.CreateShipmentResponseType = lib.to_object(
+        shipping.CreateShipmentResponseType, details
+    )
 
     return models.ShipmentDetails(
         carrier_id=settings.carrier_id,
