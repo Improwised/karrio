@@ -351,7 +351,7 @@ class TrackerDocs(django_downloadview.VirtualDownloadView):
         return ContentFile(buffer.getvalue(), name=self.name)
 
 class TrackerWebhookListener(APIView):
-    # throttle_scope = "carrier_webhook"
+    throttle_scope = "carrier_request"
 
     # @openapi.extend_schema(
     #     tags=["Trackers"],
@@ -369,19 +369,22 @@ class TrackerWebhookListener(APIView):
         """
         Receive and process tracker status updates from carrier webhooks.
         """
-        print("Received webhook payload:", request.data)  # Debug log
+        print("Received webhook payload:============", request.data)  # Debug log
 
+        serializer = serializers.WebhookPayload(data=request.data)
+        print("Serializer:============", serializer.is_valid())  # Debug log
+        if not serializer.is_valid():
+            print("Invalid webhook payload:============", serializer.errors)  # Debug log
+            return Response(
+                {"error": "Invalid payload", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        print(f"Successfully updated tracker status for")  # Debug log
         return Response(
                 {"message": "Webhook processed successfully"},
                 status=status.HTTP_200_OK,
         )
-        # serializer = serializers.WebhookPayload(data=request.data)
-        # if not serializer.is_valid():
-        #     print("Invalid webhook payload:", serializer.errors)  # Debug log
-        #     return Response(
-        #         {"error": "Invalid payload", "details": serializer.errors},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
 
         # try:
         #     tracking_number = serializer.validated_data.get('tracking_number')

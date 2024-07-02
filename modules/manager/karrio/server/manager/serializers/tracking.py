@@ -11,7 +11,6 @@ from karrio.server.core.serializers import (
     ShipmentStatus,
     TrackerStatus,
     TrackingInfo,
-    WebhookPayload,
 )
 
 import karrio.server.manager.models as models
@@ -248,3 +247,35 @@ def update_shipment_tracker(tracker: models.Tracking):
             tracker.shipment.save(update_fields=["status"])
     except Exception as e:
         logger.exception("Failed to update the tracked shipment", e)
+
+class ParcelMeasurementsSerializer(serializers.Serializer):
+    weight = serializers.FloatField()
+    dimensions = serializers.DictField()
+
+class InternationalTransitSerializer(serializers.Serializer):
+    state = serializers.CharField()
+    remark = serializers.CharField(required=False)
+    stage = serializers.CharField()
+    linehaul_information = serializers.DictField(required=False)
+
+class WebhookPayload(serializers.Serializer):
+    tracking_id = serializers.CharField()
+    shipper_order_ref_no = serializers.CharField()
+    timestamp = serializers.CharField()
+    status = serializers.CharField()
+    is_parcel_on_rts_leg = serializers.BooleanField()
+
+    picked_up_information = serializers.DictField(required=False)
+    arrived_at_pudo_information = serializers.DictField(required=False)
+    pickup_exception = serializers.DictField(required=False)
+    arrived_at_origin_hub_information = serializers.DictField(required=False)
+    arrived_at_transit_hub_information = serializers.DictField(required=False)
+    arrived_at_destination_hub_information = serializers.DictField(required=False)
+    in_transit_to_next_sorting_hub_information = serializers.DictField(required=False)
+    on_vehicle_information = serializers.DictField(required=False)
+    parcel_measurements_information = ParcelMeasurementsSerializer(required=False)
+    delivery_information = serializers.DictField(required=False)
+    delivery_exception = serializers.DictField(required=False)
+    rts_reason = serializers.CharField(required=False)
+    cancellation_information = serializers.DictField(required=False)
+    international_transit_information = InternationalTransitSerializer(required=False)
