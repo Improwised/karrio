@@ -11,6 +11,9 @@ class NinjaVanSettings(providers.Carrier):
    client_id = models.CharField(max_length=255, null=False, blank=False)
    client_secret = models.CharField(max_length=255, null=False, blank=False)
    grant_type = models.CharField(max_length=255, default="client_credentials")
+   account_country_code = models.CharField(
+        max_length=3, blank=True, null=True, choices=providers.COUNTRIES
+    )
 
    @property
    def carrier_name(self) -> str:

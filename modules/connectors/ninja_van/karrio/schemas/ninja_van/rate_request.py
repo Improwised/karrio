@@ -5,13 +5,13 @@ from jstruct import JStruct
 
 @s(auto_attribs=True)
 class FromType:
-    l1tiercode: Optional[str] = None
-    l2tiercode: Optional[str] = None
+    l1_tier_code: Optional[str] = None
+    l2_tier_code: Optional[str] = None
 
 
 @s(auto_attribs=True)
 class RateRequestType:
     weight: Optional[int] = None
-    servicelevel: Optional[str] = None
-    raterequestfrom: Optional[FromType] = JStruct[FromType]
-    to: Optional[FromType] = JStruct[FromType]
+    service_level: Optional[str] = None
+    rate_request_from: Optional[FromType] = JStruct[FromType]
+    rate_request_to: Optional[FromType] = JStruct[FromType]

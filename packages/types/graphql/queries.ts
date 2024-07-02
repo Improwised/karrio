@@ -2475,9 +2475,12 @@ export const GET_USER_CONNECTIONS = gql`
         client_id
         client_secret
         account_country_code
-        grant_type
         metadata
         config
+        carrier_name
+        display_name
+        test_mode
+        active
       }
     }
   }

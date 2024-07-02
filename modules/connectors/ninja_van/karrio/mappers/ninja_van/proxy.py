@@ -82,20 +82,26 @@ class Proxy(proxy.Proxy):
 
         return lib.Deserializable(response, lib.to_dict)
 
-    def get_waybill(self, request: lib.Serializable) -> lib.Deserializable[str]:
+    def get_waybill(self, request: lib.Serializable) -> bytes:
         payload = request.serialize()
-        tracking_numbers = payload.get('tracking_numbers', [])
-        tracking_number = "&".join([f"tracking_number={tn}" for tn in tracking_numbers])
+        tracking_number = payload.get('tracking_number')
+
+        if not tracking_number:
+            raise ValueError("A tracking number must be provided")
+
         response = lib.request(
-            url=f"{self.settings.server_url}/{self.settings.country_code}/2.0/reports/waybill/{tracking_number}",
-            data=lib.to_json(request.serialize()),
+            url=f"{self.settings.server_url}/{self.settings.country_code}/2.0/reports/waybill?tracking_number={tracking_number}",
+            data=None,  # GET request should not have a body
             trace=self.trace_as("json"),
             method="GET",
-                headers={
-                    "Accept": "application/json",
-                    "Content-type": "application/json",
-                    "Authorization": f"Bearer {self.settings.access_token}",
-                },
+            headers={
+                "Accept": "application/pdf",
+                "Authorization": f"Bearer {self.settings.access_token}",
+            },
         )
 
-        return lib.Deserializable(response, lib.to_dict)
+        # Ensure the response is successful and is a PDF
+        if response.headers.get('Content-Type') == 'application/pdf' and response.status_code == 200:
+            return response.content
+        else:
+            raise ValueError("Failed to retrieve PDF")

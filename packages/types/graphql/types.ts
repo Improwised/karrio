@@ -3256,7 +3256,7 @@ export interface get_user_connections_user_connections_NinjaVanSettingsType {
   carrier_id: string;
   client_id: string | null;
   client_secret: string | null;
-  grant_type: string | null;
+  account_country_code: string | null;
   metadata: any | null;
   config: any | null;
 }
@@ -6403,12 +6403,12 @@ export interface NationexSettingsInput {
 
 // null
 export interface NinjaVanSettingsInput {
+  account_country_code?: string | null;
   active?: boolean | null;
   config?: any | null;
   metadata?: any | null;
   client_id: string;
   client_secret: string;
-  grant_type: string;
   carrier_id: string;
 }
 
@@ -6989,12 +6989,12 @@ export interface UpdateNationexSettingsInput {
 // null
 export interface UpdateNinjaVanSettingsInput {
   id: string;
+  account_country_code?: string | null;
   active?: boolean | null;
   config?: any | null;
   metadata?: any | null;
   client_id?: string | null;
   client_secret?: string | null;
-  grant_type?: string | null;
   carrier_id?: string | null;
 }
 

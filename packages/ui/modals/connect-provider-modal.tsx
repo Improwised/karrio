@@ -1785,7 +1785,6 @@ function fieldState(carrier_name: CarrierNameType, property: string) {
           ["carrier_id", true],
           ["client_id", true],
           ["client_secret", true],
-          ["grant_type", false],
           ["account_country_code"],
         ],
         [NoneEnum.none]: [],
