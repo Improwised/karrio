@@ -32,6 +32,7 @@ def _extract_details(
         carrier_id=settings.carrier_id,
         carrier_name=settings.carrier_name,
         total_charge=total_charge,
+        currency="MYR",
         service="Standard",
     )
 

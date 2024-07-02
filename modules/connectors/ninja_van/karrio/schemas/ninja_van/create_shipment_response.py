@@ -10,7 +10,7 @@ class AddressType:
     area: Optional[str] = None
     city: Optional[str] = None
     state: Optional[str] = None
-    addresstype: Optional[str] = None
+    address_type: Optional[str] = None
     country: Optional[str] = None
     postcode: Optional[int] = None
 
@@ -18,15 +18,15 @@ class AddressType:
 @s(auto_attribs=True)
 class FromType:
     name: Optional[str] = None
-    phonenumber: Optional[str] = None
+    phone_number: Optional[str] = None
     email: Optional[str] = None
     address: Optional[AddressType] = JStruct[AddressType]
 
 
 @s(auto_attribs=True)
 class TimeslotType:
-    starttime: Optional[str] = None
-    endtime: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
     timezone: Optional[str] = None
 
 
@@ -37,41 +37,41 @@ class DimensionsType:
 
 @s(auto_attribs=True)
 class ItemType:
-    itemdescription: Optional[str] = None
+    item_description: Optional[str] = None
     quantity: Optional[int] = None
-    isdangerousgood: Optional[bool] = None
+    is_dangerous_good: Optional[bool] = None
 
 
 @s(auto_attribs=True)
 class ParcelJobType:
-    ispickuprequired: Optional[bool] = None
-    pickupservicetype: Optional[str] = None
-    pickupservicelevel: Optional[str] = None
-    pickupaddressid: Optional[int] = None
-    pickupdate: Optional[str] = None
-    pickuptimeslot: Optional[TimeslotType] = JStruct[TimeslotType]
-    pickupapproximatevolume: Optional[str] = None
-    pickupinstructions: Optional[str] = None
-    deliverystartdate: Optional[str] = None
-    deliverytimeslot: Optional[TimeslotType] = JStruct[TimeslotType]
-    deliveryinstructions: Optional[str] = None
-    allowweekenddelivery: Optional[bool] = None
+    is_pickup_required: Optional[bool] = None
+    pickup_service_type: Optional[str] = None
+    pickup_service_level: Optional[str] = None
+    pickup_addressid: Optional[int] = None
+    pickup_date: Optional[str] = None
+    pickup_timeslot: Optional[TimeslotType] = JStruct[TimeslotType]
+    pickup_approximate_volume: Optional[str] = None
+    pickup_instructions: Optional[str] = None
+    delivery_startdate: Optional[str] = None
+    delivery_timeslot: Optional[TimeslotType] = JStruct[TimeslotType]
+    delivery_instructions: Optional[str] = None
+    allow_weekend_delivery: Optional[bool] = None
     dimensions: Optional[DimensionsType] = JStruct[DimensionsType]
     items: List[ItemType] = JList[ItemType]
 
 
 @s(auto_attribs=True)
 class ReferenceType:
-    merchantordernumber: Optional[str] = None
+    merchant_order_number: Optional[str] = None
 
 
 @s(auto_attribs=True)
 class CreateShipmentResponseType:
-    requestedtrackingnumber: Optional[str] = None
-    trackingnumber: Optional[str] = None
-    servicetype: Optional[str] = None
-    servicelevel: Optional[str] = None
+    requested_tracking_number: Optional[str] = None
+    tracking_number: Optional[str] = None
+    service_type: Optional[str] = None
+    service_level: Optional[str] = None
     reference: Optional[ReferenceType] = JStruct[ReferenceType]
-    createshipmentresponsefrom: Optional[FromType] = JStruct[FromType]
+    address_from: Optional[FromType] = JStruct[FromType]
     to: Optional[FromType] = JStruct[FromType]
-    parceljob: Optional[ParcelJobType] = JStruct[ParcelJobType]
+    parcel_job: Optional[ParcelJobType] = JStruct[ParcelJobType]

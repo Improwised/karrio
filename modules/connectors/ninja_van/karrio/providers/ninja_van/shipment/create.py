@@ -12,31 +12,12 @@ import karrio.schemas.ninja_van.create_shipment_response as shipping
 
 
 def parse_shipment_response(
-    _responses: lib.Deserializable[dict],
+    _response: lib.Deserializable[dict],
     settings: provider_utils.Settings,
 ) -> typing.Tuple[typing.List[models.RateDetails], typing.List[models.Message]]:
-    responses = _responses.deserialize()
-    shipment = lib.to_multi_piece_shipment(
-        [
-            (
-                f"{_}",
-            (
-        _extract_details(response, settings)
-        if "tracking_number" in response
-        else None
-    ),
-            )
-            for _, response in enumerate(responses, start=1)
-        ]
-    )
-
-    messages: typing.List[models.Message] = sum(
-        [
-            error.parse_error_response(response, settings)
-            for response in responses
-        ],
-        start=[],
-    )
+    response = _response.deserialize()
+    messages = error.parse_error_response(response, settings)
+    shipment = _extract_details(response, settings) if len(messages) == 0 else None
 
     return shipment, messages
 
@@ -47,22 +28,17 @@ def _extract_details(
 ) -> models.ShipmentDetails:
     details = data
 
-    order: shipping.OrderResponseType = lib.to_object(
-        shipping.OrderResponseType, details
-    )
-
     return models.ShipmentDetails(
         carrier_id=settings.carrier_id,
         carrier_name=settings.carrier_name,
         tracking_number=order.tracking_number,
         shipment_identifier=order.requested_tracking_number,  # extract shipment identifier from shipment
-        service_type=order.service_type,
-        items=[order.items],
+        label_type="PDF",
+        docs=models.Documents(label="No label..."),
+        id=order.requested_tracking_number,
         meta=dict(
-            reference=order.reference,
-            order_from=order.create_shipment_request_from,
-            order_to=order.to,
-            order_parcel_job=order.parcel_job,
+            service_level=order.service_level,
+            service_type=order.service_type,
             tracking_number=order.tracking_number,
         ),
     )
@@ -84,7 +60,7 @@ def shipment_request(
     request = dict(
         service_type="Parcel",
         service_level=service,
-        requested_tracking_number=payload.reference,
+        requested_tracking_number=payload.metadata.get("requested_tracking_number", None),
         reference=ninja_van.ReferenceType(
             merchant_order_number=payload.reference
         ),
@@ -95,11 +71,11 @@ def shipment_request(
             address=ninja_van.AddressType(
                 address1=shipper.address_line1,
                 address2=shipper.address_line2,
-                area=shipper.city,
+                area=payload.metadata.get("from_area", None),
                 city=shipper.city,
                 state=shipper.state_code,
-                country=shipper.country_code,
-                post_code=shipper.postal_code,
+                country=payload.metadata.get("from_country", None),
+                postcode=shipper.postal_code,
             ),
         ),
         to=ninja_van.FromType(
@@ -109,11 +85,11 @@ def shipment_request(
             address=ninja_van.AddressType(
                 address1=recipient.address_line1,
                 address2=recipient.address_line2,
-                area=recipient.city,
+                area=payload.metadata.get("to_area", None),
                 city=recipient.city,
                 state=recipient.state_code,
-                country=recipient.country_code,
-                post_code=recipient.postal_code,
+                country=payload.metadata.get("to_country", None),
+                postcode=recipient.postal_code,
             ),
         ),
         parcel_job=ninja_van.ParcelJobType(
@@ -129,7 +105,7 @@ def shipment_request(
             ),
             pickup_instructions=options.pickup_instructions.state,
             delivery_instructions=options.delivery_instructions.state,
-            delivery_startdate= payload.metadata.get("delivery_startdate", None),
+            delivery_start_date= payload.metadata.get("delivery_startdate", None),
             delivery_timeslot=ninja_van.TimeslotType(
                 start_time=payload.metadata.get("delivery_timeslot", {}).get("start_time", None),
                 end_time=payload.metadata.get("delivery_timeslot", {}).get("end_time", None),

@@ -12,7 +12,7 @@ class AddressType:
     state: Optional[str] = None
     address_type: Optional[str] = None
     country: Optional[str] = None
-    post_code: Optional[int] = None
+    postcode: Optional[int] = None
 
 
 @s(auto_attribs=True)
@@ -52,7 +52,7 @@ class ParcelJobType:
     pickup_timeslot: Optional[TimeslotType] = JStruct[TimeslotType]
     pickup_instructions: Optional[str] = None
     delivery_instructions: Optional[str] = None
-    delivery_startdate: Optional[str] = None
+    delivery_start_date: Optional[str] = None
     delivery_timeslot: Optional[TimeslotType] = JStruct[TimeslotType]
     dimensions: Optional[DimensionsType] = JStruct[DimensionsType]
     items: List[ItemType] = JList[ItemType]
