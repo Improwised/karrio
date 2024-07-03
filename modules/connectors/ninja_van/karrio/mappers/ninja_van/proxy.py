@@ -36,7 +36,7 @@ class Proxy(proxy.Proxy):
              headers={
                 "Accept": "application/json",
                 "Content-type": "application/json",
-                "Authorization": f"Bearer {self.settings.access_token}",
+                "Authorization": f"Bearer za75SQTwo7fJ0FSCvvhQa7PDNL0Gk6qw",
             },
         )
         logger.debug(f"=========(((((((fetch shipment rates. response))))))): {response}")
@@ -45,31 +45,24 @@ class Proxy(proxy.Proxy):
 
     def cancel_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
         payload = request.serialize()
-        tracking_number = payload.get('tracking_number')
-        response = lib.run_asynchronously(
-            lambda payload: (
-                payload["id"],
-                lib.request(
-                    url=f"{self.settings.server_url}/{self.settings.account_country_code}/2.2/orders/{tracking_number}",
-                    trace=self.trace_as("json"),
-                    method="DELETE",
-                    headers={
-                        "Accept": "application/json",
-                        "Content-type": "application/json",
-                        "Authorization": f"Bearer {self.settings.access_token}",
-                    },
-                ),
-            ),
-            payload,
+        tracking_number = payload["options"]["tracking_number"]
+        print(f"tracking_number=====================:\n\n\n\n\n\n {tracking_number}, {self.settings.server_url}, {self.settings.account_country_code}")
+        response = lib.request(
+            url=f"{self.settings.server_url}/{self.settings.account_country_code}/2.2/orders/{tracking_number}",
+            data=lib.to_json(request.serialize()),
+            trace=self.trace_as("json"),
+            method="DELETE",
+            headers={
+                "Accept": "application/json",
+                "Content-type": "application/json",
+                "Authorization": f"Bearer za75SQTwo7fJ0FSCvvhQa7PDNL0Gk6qw",
+            },
         )
-
-        return lib.Deserializable(
-            response,
-            lambda __: [(id, lib.to_dict(_)) for id, _ in __],
-        )
+        print(f"response=====================:{response}\n\n\n\n\n")
+        return lib.Deserializable(response, lib.to_dict)
 
     def get_tracking(self, request: lib.Serializable) -> lib.Deserializable[str]:
-        logger.debug(f"============================fetch shipment rates. payload:")
+        logger.debug(f"============================fetch shipment rates. payload:\n\n\n\n\n\n")
         payload = request.serialize()
         tracking_numbers = payload.get('tracking_numbers', [])
         tracking_number = "&".join([f"tracking_number={tn}" for tn in tracking_numbers])
