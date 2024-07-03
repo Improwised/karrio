@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
 
+from django.utils import timezone
 from karrio.server.core.views.api import GenericAPIView, APIView
 from karrio.server.manager.router import router
 import karrio.server.manager.serializers as serializers
@@ -20,6 +21,7 @@ import karrio.server.core.dataunits as dataunits
 import karrio.server.manager.models as models
 import karrio.server.core.filters as filters
 import karrio.server.openapi as openapi
+import requests
 
 ENDPOINT_ID = "$$$$$$"  # This endpoint id is used to make operation ids unique make sure not to duplicate
 logger = logging.getLogger(__name__)
@@ -353,18 +355,6 @@ class TrackerDocs(django_downloadview.VirtualDownloadView):
 class TrackerWebhookListener(APIView):
     throttle_scope = "carrier_request"
 
-    # @openapi.extend_schema(
-    #     tags=["Trackers"],
-    #     operation_id=f"{ENDPOINT_ID}webhook",
-    #     extensions={"x-operationId": "trackerWebhook"},
-    #     summary="Tracker status webhook listener",
-    #     request=serializers.WebhookPayload(),
-    #     responses={
-    #         200: serializers.SuccessResponse(),
-    #         400: serializers.ErrorResponse(),
-    #         500: serializers.ErrorResponse(),
-    #     },
-    # )
     def post(self, request: Request):
         """
         Receive and process tracker status updates from carrier webhooks.
@@ -372,55 +362,68 @@ class TrackerWebhookListener(APIView):
         print("Received webhook payload:============", request.data)  # Debug log
 
         serializer = serializers.WebhookPayload(data=request.data)
-        print("Serializer:============", serializer.is_valid())  # Debug log
         if not serializer.is_valid():
-            print("Invalid webhook payload:============", serializer.errors)  # Debug log
             return Response(
                 {"error": "Invalid payload", "details": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        print("Serializer:============", serializer.validated_data.get('tracking_id'))  # Debug log
 
-        print(f"Successfully updated tracker status for")  # Debug log
-        return Response(
+        try:
+            tracker = models.Tracking.access_by(request).get(
+                Q(tracking_number=serializer.validated_data.get('tracking_id'))
+            )
+
+            # get me the carrier name from the tracker
+            carrier_id = tracker.tracking_carrier_id
+            carrier_name = tracker.carrier_name
+            print("Carrier Name:============", carrier_id)  # Debug log
+            print("Carrier Settings:============", carrier_name)  # Debug log
+
+            # If carrier name is ninja_van then make the post request post
+            if carrier_name == "ninja_van":
+                tracking_number = serializer.validated_data.get('tracking_id')
+                new_status = serializer.validated_data.get('status')
+                timestamp = serializer.validated_data.get('timestamp')
+                shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
+                tracker.status = new_status
+                tracker.reference = shipper_order_ref_number
+                tracker.updated_at = timezone.now()
+                tracker.save()
+                forward_url = "http://nifi/ninjavan/webhook"
+                response = requests.post(forward_url, json=request.data)
+                if response.status_code == 200:
+                    return Response({"status": "received"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
+            if carrier_name == "jne":
+                tracking_number = serializer.validated_data.get('tracking_id')
+                new_status = serializer.validated_data.get('status')
+                timestamp = serializer.validated_data.get('timestamp')
+                shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
+                tracker.status = new_status
+                tracker.reference = shipper_order_ref_number
+                tracker.updated_at = timezone.now()
+                tracker.save()
+                forward_url = "http://nifi/jne/webhook"
+                response = requests.post(forward_url, json=request.data)
+                if response.status_code == 200:
+                    return Response({"status": "received"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
+
+            print(f"Successfully updated tracker status for", tracking_number, " - " , new_status, " - " , timestamp, " - " , shipper_order_ref_number)  # Debug log
+            return Response(
                 {"message": "Webhook processed successfully"},
                 status=status.HTTP_200_OK,
-        )
+            )
 
-        # try:
-        #     tracking_number = serializer.validated_data.get('tracking_number')
-        #     new_status = serializer.validated_data.get('status')
-
-        #     print(f"Processing update for tracking number: {tracking_number}")  # Debug log
-        #     print(f"New status: {new_status}")  # Debug log
-
-        #     # Find the corresponding tracker
-        #     tracker = models.Tracking.objects.filter(tracking_number=tracking_number).first()
-
-        #     if not tracker:
-        #         print(f"Tracker not found for tracking number: {tracking_number}")  # Debug log
-        #         return Response(
-        #             {"error": "Tracker not found"},
-        #             status=status.HTTP_404_NOT_FOUND,
-        #         )
-
-        #     # Update the tracker status
-        #     tracker.status = new_status
-        #     tracker.save()
-
-        #     print(f"Successfully updated tracker status for {tracking_number}")  # Debug log
-
-        #     return Response(
-        #         {"message": "Webhook processed successfully"},
-        #         status=status.HTTP_200_OK,
-        #     )
-
-        # except Exception as e:
-        #     print(f"Error processing webhook: {str(e)}")  # Debug log
-        #     return Response(
-        #         {"error": "Internal server error", "details": str(e)},
-        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     )
-
+        except Exception as e:
+            print(f"Error processing webhook: {str(e)}")
+            return Response(
+                {"error": "Internal server error", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 router.urls.append(
     path(
