@@ -36,7 +36,7 @@ class Proxy(proxy.Proxy):
              headers={
                 "Accept": "application/json",
                 "Content-type": "application/json",
-                "Authorization": f"Bearer za75SQTwo7fJ0FSCvvhQa7PDNL0Gk6qw",
+                "Authorization": f"Bearer {self.settings.access_token}",
             },
         )
         logger.debug(f"=========(((((((fetch shipment rates. response))))))): {response}")
@@ -54,7 +54,7 @@ class Proxy(proxy.Proxy):
             headers={
                 "Accept": "application/json",
                 "Content-type": "application/json",
-                "Authorization": f"Bearer za75SQTwo7fJ0FSCvvhQa7PDNL0Gk6qw",
+                "Authorization": f"Bearer {self.settings.access_token}",
             },
         )
         return lib.Deserializable(response, lib.to_dict)
