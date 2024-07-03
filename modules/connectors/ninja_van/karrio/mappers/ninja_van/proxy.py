@@ -46,7 +46,6 @@ class Proxy(proxy.Proxy):
     def cancel_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
         payload = request.serialize()
         tracking_number = payload["options"]["tracking_number"]
-        print(f"tracking_number=====================:\n\n\n\n\n\n {tracking_number}, {self.settings.server_url}, {self.settings.account_country_code}")
         response = lib.request(
             url=f"{self.settings.server_url}/{self.settings.account_country_code}/2.2/orders/{tracking_number}",
             data=lib.to_json(request.serialize()),
@@ -58,7 +57,6 @@ class Proxy(proxy.Proxy):
                 "Authorization": f"Bearer za75SQTwo7fJ0FSCvvhQa7PDNL0Gk6qw",
             },
         )
-        print(f"response=====================:{response}\n\n\n\n\n")
         return lib.Deserializable(response, lib.to_dict)
 
     def get_tracking(self, request: lib.Serializable) -> lib.Deserializable[str]:
