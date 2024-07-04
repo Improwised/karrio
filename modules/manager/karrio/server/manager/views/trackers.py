@@ -2,7 +2,7 @@ import io
 import base64
 import logging
 import django_downloadview
-
+import karrio.lib as lib
 from django.db.models import Q
 from django.urls import path, re_path
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,7 +12,8 @@ from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
-
+from karrio.server.events import models as event_models
+import karrio.core.models as trackmodels
 from django.utils import timezone
 from karrio.server.core.views.api import GenericAPIView, APIView
 from karrio.server.manager.router import router
@@ -21,6 +22,7 @@ import karrio.server.core.dataunits as dataunits
 import karrio.server.manager.models as models
 import karrio.server.core.filters as filters
 import karrio.server.openapi as openapi
+from karrio.server.events.task_definitions.base.webhook import notify_subscribers
 import requests
 
 ENDPOINT_ID = "$$$$$$"  # This endpoint id is used to make operation ids unique make sure not to duplicate
@@ -368,51 +370,41 @@ class TrackerWebhookListener(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         print("Serializer:============", serializer.validated_data.get('tracking_id'))  # Debug log
-
         try:
             tracker = models.Tracking.access_by(request).get(
                 Q(tracking_number=serializer.validated_data.get('tracking_id'))
             )
-
+            print("Tracker:============", tracker)  # Debug log
             # get me the carrier name from the tracker
-            carrier_id = tracker.tracking_carrier_id
             carrier_name = tracker.carrier_name
-            print("Carrier Name:============", carrier_id)  # Debug log
-            print("Carrier Settings:============", carrier_name)  # Debug log
 
-            # If carrier name is ninja_van then make the post request post
-            if carrier_name == "ninja_van":
-                tracking_number = serializer.validated_data.get('tracking_id')
+            webhook = event_models.Webhook.access_by(request).get(description=carrier_name)
+            if not webhook:
+                return Response(
+                    {"error": "Webhook not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            if carrier_name == webhook.url:
                 new_status = serializer.validated_data.get('status')
-                timestamp = serializer.validated_data.get('timestamp')
                 shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
                 tracker.status = new_status
                 tracker.reference = shipper_order_ref_number
                 tracker.updated_at = timezone.now()
+                # updated_events = []
+                # for event in tracker.events:
+                #     event['code'] = new_status
+                #     updated_events.append(event)
+                #     tracker.events = updated_events
                 tracker.save()
-                forward_url = "http://nifi/ninjavan/webhook"
-                response = requests.post(forward_url, json=request.data)
-                if response.status_code == 200:
-                    return Response({"status": "received"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
-            if carrier_name == "jne":
-                tracking_number = serializer.validated_data.get('tracking_id')
-                new_status = serializer.validated_data.get('status')
-                timestamp = serializer.validated_data.get('timestamp')
-                shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
-                tracker.status = new_status
-                tracker.reference = shipper_order_ref_number
-                tracker.updated_at = timezone.now()
-                tracker.save()
-                forward_url = "http://nifi/jne/webhook"
+
+                forward_url = webhook.url
+                print("Forwarding data to: ", request.data)
                 response = requests.post(forward_url, json=request.data)
                 if response.status_code == 200:
                     return Response({"status": "received"}, status=status.HTTP_200_OK)
                 else:
                     return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
 
-            print(f"Successfully updated tracker status for", tracking_number, " - " , new_status, " - " , timestamp, " - " , shipper_order_ref_number)  # Debug log
             return Response(
                 {"message": "Webhook processed successfully"},
                 status=status.HTTP_200_OK,
