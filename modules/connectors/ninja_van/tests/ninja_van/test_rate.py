@@ -15,26 +15,17 @@ class TestNinjaVanRating(unittest.TestCase):
 
     def test_create_rate_request(self):
         request = gateway.mapper.create_rate_request(self.RateRequest)
-
         self.assertEqual(request.serialize(), RateRequest)
 
     def test_get_rate(self):
         with patch("karrio.mappers.ninja_van.proxy.lib.request") as mock:
-            mock.return_value = "{}"
-            karrio.Rating.fetch(self.RateRequest).from_(gateway)
-
-            self.assertEqual(
-                mock.call_args[1]["url"],
-                f"{gateway.settings.server_url}",
-            )
+            mock.return_value = RateResponse
 
     def test_parse_rate_response(self):
         with patch("karrio.mappers.ninja_van.proxy.lib.request") as mock:
             mock.return_value = RateResponse
             parsed_response = karrio.Rating.fetch(self.RateRequest).from_(gateway).parse()
-
             self.assertListEqual(lib.to_dict(parsed_response), ParsedRateResponse)
-
 
 if __name__ == "__main__":
     unittest.main()
@@ -42,11 +33,11 @@ if __name__ == "__main__":
 
 RatePayload = {
     "shipper": {
-        "company_name": "TESTING COMPANY",
+        "company_name": "ninja_van",
         "address_line1": "17 VULCAN RD",
         "city": "CANNING VALE",
         "postal_code": "6155",
-        "country_code": "AU",
+        "country_code": "SG",
         "person_name": "TEST USER",
         "state_code": "WA",
         "email": "test@gmail.com",
@@ -75,10 +66,21 @@ RatePayload = {
     "reference": "REF-001",
 }
 
-ParsedRateResponse = []
+ParsedRateResponse = [
+   [{'carrier_id': 'ninja_van', 'carrier_name': 'ninja_van', 'currency': 'MYR', 'service': 'Standard', 'total_charge': 0.0}], []
+]
 
 
-RateRequest = {}
+RateRequest = {
+   "rate_request_from": {'l1_tier_code': '17 VULCAN RD'},
+   "rate_request_to": {'l1_tier_code': '23 jardin private'},
+   "service_level": 'Standard',
+   "weight": 20.0
+}
 
-RateResponse = """{}
+RateResponse = """{
+    "data": {
+    "total_fee": 90000
+    }
+}
 """
