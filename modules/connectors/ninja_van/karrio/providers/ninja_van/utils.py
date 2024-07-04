@@ -56,6 +56,10 @@ class Settings(core.Settings):
         self.connection_cache.set(cache_key, new_auth)
         return new_auth["access_token"]
 
+    @property
+    def tracking_url(self):
+        return "https://www.ninjavan.co/en-mm/tracking?id={}"
+
 
 def login(settings: Settings, client_id: str = None, client_secret: str = None):
     import karrio.providers.ninja_van.error as error

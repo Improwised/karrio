@@ -18,8 +18,6 @@ def parse_shipment_response(
     response = _response.deserialize()
     messages = error.parse_error_response(response, settings)
     shipment = _extract_details(response, settings) if len(messages) == 0 else None
-    print("************RESPONSES******************", response, shipment)
-
     return shipment, messages
 
 
@@ -28,20 +26,21 @@ def _extract_details(
     settings: provider_utils.Settings,
 ) -> models.ShipmentDetails:
     details = data
-    print("************DETAILS******************", details)
     order: shipping.CreateShipmentResponseType = lib.to_object(
         shipping.CreateShipmentResponseType, details
     )
 
+    tracking_number=order.tracking_number
     return models.ShipmentDetails(
         carrier_id=settings.carrier_id,
         carrier_name=settings.carrier_name,
-        tracking_number=order.tracking_number,
+        tracking_number=tracking_number,
         shipment_identifier=order.requested_tracking_number,  # extract shipment identifier from shipment
         label_type="PDF",
         docs=models.Documents(label="No label..."),
         id=order.requested_tracking_number,
         meta=dict(
+            carrier_tracking_url=settings.tracking_url.format(tracking_number),
             service_level=order.service_level,
             service_type=order.service_type,
             tracking_number=order.tracking_number,
