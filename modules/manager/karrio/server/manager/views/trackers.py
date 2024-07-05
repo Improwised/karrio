@@ -384,7 +384,7 @@ class TrackerWebhookListener(APIView):
                     {"error": "Webhook not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            if carrier_name == webhook.url:
+            if carrier_name == webhook.description:
                 new_status = serializer.validated_data.get('status')
                 shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
                 tracker.status = new_status
