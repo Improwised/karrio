@@ -24,7 +24,7 @@ class Proxy(proxy.Proxy):
             #         "Authorization": f"Bearer {self.settings.access_token}",
             #     },
             # )
-        custom_response = json.dumps({"data": {"total_fee": 90000}})
+        custom_response = json.dumps({"data": {"total_fee": 10}})
         return lib.Deserializable(custom_response, lib.to_dict)
 
     def create_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
