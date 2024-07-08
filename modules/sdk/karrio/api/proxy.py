@@ -182,19 +182,3 @@ class Proxy(abc.ABC):
         raise errors.MethodNotSupportedError(
             self.__class__.create_manifest.__name__, self.settings.carrier_name
         )
-
-    def webhook_listener(self, response: lib.Serializable) -> lib.Deserializable:
-        """Send one or many request(s) to create a manifest from a carrier webservice
-
-        Args:
-            request (Serializable): a carrier specific serializable request data type
-
-        Returns:
-            Deserializable: a Deserializable rate response (xml, json, text...)
-
-        Raises:
-
-        """
-        raise errors.MethodNotSupportedError(
-            self.__class__.webhook_listener.__name__, self.settings.carrier_name
-        )

@@ -361,13 +361,3 @@ class Error:
     message: str = None
     code: str = None
     details: typing.Dict = None
-
-@attr.s(auto_attribs=True)
-class Webhook:
-    carrier_id: str
-    carrier_name: str
-    tracking_number: str
-    payload: dict
-    created_at: str
-    updated_at: str
-    meta: dict = {}

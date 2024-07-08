@@ -390,15 +390,15 @@ class TrackerWebhookListener(APIView):
                 tracker.status = new_status
                 tracker.reference = shipper_order_ref_number
                 tracker.updated_at = timezone.now()
-                # updated_events = []
-                # for event in tracker.events:
-                #     event['code'] = new_status
-                #     updated_events.append(event)
-                #     tracker.events = updated_events
+                updated_events = []
+                for event in tracker.events:
+                    event['code'] = new_status
+                    updated_events.append(event)
+                    tracker.events = updated_events
                 tracker.save()
 
                 forward_url = webhook.url
-                print("Forwarding data to: ", request.data)
+                print("Forwarding data to: ", request.data, " to ", forward_url)  # Debug log
                 response = requests.post(forward_url, json=request.data)
                 if response.status_code == 200:
                     return Response({"status": "received"}, status=status.HTTP_200_OK)

@@ -393,23 +393,3 @@ class Mapper(abc.ABC):
             self.__class__.parse_manifest_response.__name__,
             self.settings.carrier_name,
         )
-
-    def parse_webhook_response(
-        self, response: lib.Deserializable
-    ) -> typing.Tuple[models.WebhookListener, typing.List[models.Message]]:
-        """Create a unified API webhook response from carrier response
-
-        Args:
-            response (Deserializable): a deserializable webhook response (xml, json, text...)
-
-        Returns:
-            Tuple[WebhookListener, List[Message]]: the webhook details
-                as well as errors and messages returned
-
-        Raises:
-            MethodNotSupportedError: Is raised when the carrier integration does not implement this method
-        """
-        raise errors.MethodNotSupportedError(
-            self.__class__.parse_webhook_response.__name__,
-            self.settings.carrier_name,
-        )
