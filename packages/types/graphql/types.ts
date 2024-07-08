@@ -3250,18 +3250,7 @@ export interface get_user_connections_user_connections_Zoom2uSettingsType {
   api_key: string | null;
 }
 
-export interface get_user_connections_user_connections_NinjaVanSettingsType {
-  __typename: "NinjaVanSettingsType";
-  id: string;
-  carrier_id: string;
-  client_id: string | null;
-  client_secret: string | null;
-  account_country_code: string | null;
-  metadata: any | null;
-  config: any | null;
-}
-
-export type get_user_connections_user_connections = get_user_connections_user_connections_AlliedExpressSettingsType | get_user_connections_user_connections_AlliedExpressLocalSettingsType | get_user_connections_user_connections_AmazonShippingSettingsType | get_user_connections_user_connections_AramexSettingsType | get_user_connections_user_connections_AsendiaUSSettingsType | get_user_connections_user_connections_AustraliaPostSettingsType | get_user_connections_user_connections_BoxKnightSettingsType | get_user_connections_user_connections_BelgianPostSettingsType | get_user_connections_user_connections_CanadaPostSettingsType | get_user_connections_user_connections_CanparSettingsType | get_user_connections_user_connections_ChronopostSettingsType | get_user_connections_user_connections_ColissimoSettingsType | get_user_connections_user_connections_DHLParcelDESettingsType | get_user_connections_user_connections_DHLExpressSettingsType | get_user_connections_user_connections_DHLPolandSettingsType | get_user_connections_user_connections_DHLUniversalSettingsType | get_user_connections_user_connections_DicomSettingsType | get_user_connections_user_connections_DPDSettingsType | get_user_connections_user_connections_DPDHLSettingsType | get_user_connections_user_connections_EShipperXMLSettingsType | get_user_connections_user_connections_EasyPostSettingsType | get_user_connections_user_connections_FedexSettingsType | get_user_connections_user_connections_FedexWSSettingsType | get_user_connections_user_connections_FreightcomSettingsType | get_user_connections_user_connections_GenericSettingsType | get_user_connections_user_connections_GEODISSettingsType | get_user_connections_user_connections_LaPosteSettingsType | get_user_connections_user_connections_Locate2uSettingsType | get_user_connections_user_connections_NationexSettingsType | get_user_connections_user_connections_PurolatorSettingsType | get_user_connections_user_connections_RoadieSettingsType | get_user_connections_user_connections_RoyalMailSettingsType | get_user_connections_user_connections_SendleSettingsType | get_user_connections_user_connections_TGESettingsType | get_user_connections_user_connections_TNTSettingsType | get_user_connections_user_connections_UPSSettingsType | get_user_connections_user_connections_USPSSettingsType | get_user_connections_user_connections_USPSInternationalSettingsType | get_user_connections_user_connections_Zoom2uSettingsType | get_user_connections_user_connections_NinjaVanSettingsType;
+export type get_user_connections_user_connections = get_user_connections_user_connections_AlliedExpressSettingsType | get_user_connections_user_connections_AlliedExpressLocalSettingsType | get_user_connections_user_connections_AmazonShippingSettingsType | get_user_connections_user_connections_AramexSettingsType | get_user_connections_user_connections_AsendiaUSSettingsType | get_user_connections_user_connections_AustraliaPostSettingsType | get_user_connections_user_connections_BoxKnightSettingsType | get_user_connections_user_connections_BelgianPostSettingsType | get_user_connections_user_connections_CanadaPostSettingsType | get_user_connections_user_connections_CanparSettingsType | get_user_connections_user_connections_ChronopostSettingsType | get_user_connections_user_connections_ColissimoSettingsType | get_user_connections_user_connections_DHLParcelDESettingsType | get_user_connections_user_connections_DHLExpressSettingsType | get_user_connections_user_connections_DHLPolandSettingsType | get_user_connections_user_connections_DHLUniversalSettingsType | get_user_connections_user_connections_DicomSettingsType | get_user_connections_user_connections_DPDSettingsType | get_user_connections_user_connections_DPDHLSettingsType | get_user_connections_user_connections_EShipperXMLSettingsType | get_user_connections_user_connections_EasyPostSettingsType | get_user_connections_user_connections_FedexSettingsType | get_user_connections_user_connections_FedexWSSettingsType | get_user_connections_user_connections_FreightcomSettingsType | get_user_connections_user_connections_GenericSettingsType | get_user_connections_user_connections_GEODISSettingsType | get_user_connections_user_connections_LaPosteSettingsType | get_user_connections_user_connections_Locate2uSettingsType | get_user_connections_user_connections_NationexSettingsType | get_user_connections_user_connections_PurolatorSettingsType | get_user_connections_user_connections_RoadieSettingsType | get_user_connections_user_connections_RoyalMailSettingsType | get_user_connections_user_connections_SendleSettingsType | get_user_connections_user_connections_TGESettingsType | get_user_connections_user_connections_TNTSettingsType | get_user_connections_user_connections_UPSSettingsType | get_user_connections_user_connections_USPSSettingsType | get_user_connections_user_connections_USPSInternationalSettingsType | get_user_connections_user_connections_Zoom2uSettingsType;
 
 export interface get_user_connections {
   user_connections: get_user_connections_user_connections[];
@@ -5895,7 +5884,6 @@ export enum CarrierNameEnum {
   laposte = "laposte",
   locate2u = "locate2u",
   nationex = "nationex",
-  ninja_van = "ninja_van",
   purolator = "purolator",
   roadie = "roadie",
   royalmail = "royalmail",
@@ -5995,7 +5983,6 @@ export interface CreateCarrierConnectionMutationInput {
   laposte?: LaPosteSettingsInput | null;
   locate2u?: Locate2uSettingsInput | null;
   nationex?: NationexSettingsInput | null;
-  ninja_van?: NinjaVanSettingsInput | null;
   purolator?: PurolatorSettingsInput | null;
   roadie?: RoadieSettingsInput | null;
   royalmail?: RoyalMailSettingsInput | null;
@@ -6402,17 +6389,6 @@ export interface NationexSettingsInput {
 }
 
 // null
-export interface NinjaVanSettingsInput {
-  account_country_code?: string | null;
-  active?: boolean | null;
-  config?: any | null;
-  metadata?: any | null;
-  client_id: string;
-  client_secret: string;
-  carrier_id: string;
-}
-
-// null
 export interface PurolatorSettingsInput {
   active?: boolean | null;
   config?: any | null;
@@ -6561,7 +6537,6 @@ export interface UpdateCarrierConnectionMutationInput {
   laposte?: UpdateLaPosteSettingsInput | null;
   locate2u?: UpdateLocate2uSettingsInput | null;
   nationex?: UpdateNationexSettingsInput | null;
-  ninja_van?: UpdateNinjaVanSettingsInput | null;
   purolator?: UpdatePurolatorSettingsInput | null;
   roadie?: UpdateRoadieSettingsInput | null;
   royalmail?: UpdateRoyalMailSettingsInput | null;
@@ -6983,18 +6958,6 @@ export interface UpdateNationexSettingsInput {
   customer_id?: string | null;
   billing_account?: string | null;
   language?: string | null;
-  carrier_id?: string | null;
-}
-
-// null
-export interface UpdateNinjaVanSettingsInput {
-  id: string;
-  account_country_code?: string | null;
-  active?: boolean | null;
-  config?: any | null;
-  metadata?: any | null;
-  client_id?: string | null;
-  client_secret?: string | null;
   carrier_id?: string | null;
 }
 

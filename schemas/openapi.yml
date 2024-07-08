@@ -687,9 +687,8 @@ paths:
           `bpost`, `canadapost`, `canpar`, `chronopost`, `colissimo`, `dhl_express`,
           `dhl_parcel_de`, `dhl_poland`, `dhl_universal`, `dicom`, `dpd`, `dpdhl`,
           `easypost`, `eshipper_xml`, `fedex`, `fedex_ws`, `freightcom`, `generic`,
-          `geodis`, `laposte`, `locate2u`, `nationex`, `ninja_van`, `purolator`, `roadie`,
-          `royalmail`, `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`,
-          `zoom2u`'
+          `geodis`, `laposte`, `locate2u`, `nationex`, `purolator`, `roadie`, `royalmail`,
+          `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`, `zoom2u`'
       - in: query
         name: metadata_key
         schema:
@@ -738,9 +737,8 @@ paths:
           `bpost`, `canadapost`, `canpar`, `chronopost`, `colissimo`, `dhl_express`,
           `dhl_parcel_de`, `dhl_poland`, `dhl_universal`, `dicom`, `dpd`, `dpdhl`,
           `easypost`, `eshipper_xml`, `fedex`, `fedex_ws`, `freightcom`, `generic`,
-          `geodis`, `laposte`, `locate2u`, `nationex`, `ninja_van`, `purolator`, `roadie`,
-          `royalmail`, `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`,
-          `zoom2u`'
+          `geodis`, `laposte`, `locate2u`, `nationex`, `purolator`, `roadie`, `royalmail`,
+          `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`, `zoom2u`'
         required: true
       tags:
       - Carriers
@@ -1184,9 +1182,8 @@ paths:
           `bpost`, `canadapost`, `canpar`, `chronopost`, `colissimo`, `dhl_express`,
           `dhl_parcel_de`, `dhl_poland`, `dhl_universal`, `dicom`, `dpd`, `dpdhl`,
           `easypost`, `eshipper_xml`, `fedex`, `fedex_ws`, `freightcom`, `generic`,
-          `geodis`, `laposte`, `locate2u`, `nationex`, `ninja_van`, `purolator`, `roadie`,
-          `royalmail`, `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`,
-          `zoom2u`'
+          `geodis`, `laposte`, `locate2u`, `nationex`, `purolator`, `roadie`, `royalmail`,
+          `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`, `zoom2u`'
       - in: query
         name: created_after
         schema:
@@ -2079,7 +2076,6 @@ paths:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -2170,7 +2166,6 @@ paths:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -2261,7 +2256,6 @@ paths:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -2445,7 +2439,6 @@ paths:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -2578,7 +2571,6 @@ paths:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -2710,9 +2702,8 @@ paths:
           `bpost`, `canadapost`, `canpar`, `chronopost`, `colissimo`, `dhl_express`,
           `dhl_parcel_de`, `dhl_poland`, `dhl_universal`, `dicom`, `dpd`, `dpdhl`,
           `easypost`, `eshipper_xml`, `fedex`, `fedex_ws`, `freightcom`, `generic`,
-          `geodis`, `laposte`, `locate2u`, `nationex`, `ninja_van`, `purolator`, `roadie`,
-          `royalmail`, `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`,
-          `zoom2u`'
+          `geodis`, `laposte`, `locate2u`, `nationex`, `purolator`, `roadie`, `royalmail`,
+          `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`, `zoom2u`'
       - in: query
         name: created_after
         schema:
@@ -3144,9 +3135,8 @@ paths:
           `bpost`, `canadapost`, `canpar`, `chronopost`, `colissimo`, `dhl_express`,
           `dhl_parcel_de`, `dhl_poland`, `dhl_universal`, `dicom`, `dpd`, `dpdhl`,
           `easypost`, `eshipper_xml`, `fedex`, `fedex_ws`, `freightcom`, `generic`,
-          `geodis`, `laposte`, `locate2u`, `nationex`, `ninja_van`, `purolator`, `roadie`,
-          `royalmail`, `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`,
-          `zoom2u`'
+          `geodis`, `laposte`, `locate2u`, `nationex`, `purolator`, `roadie`, `royalmail`,
+          `sendle`, `tge`, `tnt`, `ups`, `usps`, `usps_international`, `zoom2u`'
       - in: query
         name: created_after
         schema:
@@ -3296,7 +3286,6 @@ paths:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -4590,7 +4579,6 @@ components:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -4602,7 +4590,7 @@ components:
           - usps_international
           - zoom2u
           type: string
-          x-spec-enum-id: 0236585f09e231bd
+          x-spec-enum-id: 3e79a5375c88cfd3
           description: Indicates a carrier (type)
         display_name:
           type: string
@@ -9535,7 +9523,6 @@ components:
           - laposte
           - locate2u
           - nationex
-          - ninja_van
           - purolator
           - roadie
           - royalmail
@@ -9547,7 +9534,7 @@ components:
           - usps_international
           - zoom2u
           type: string
-          x-spec-enum-id: 57da3ca81dfd8d4c
+          x-spec-enum-id: db5a0511af909ff1
           description: The tracking carrier
         account_number:
           type: string
@@ -10087,7 +10074,6 @@ tags:
     | amazon_shipping | AmazonShipping |
     | allied_express_local | Allied Express Local |
     | allied_express | Allied Express |
-    | ninja_van | Ninja Van |
 
     ---
     ## Services
