@@ -357,12 +357,22 @@ class TrackerDocs(django_downloadview.VirtualDownloadView):
 class TrackerWebhookListener(APIView):
     throttle_scope = "carrier_request"
 
+    STATUS_MAPPING = {
+        "Picked Up": "shipment_out_for_delivery",
+        "Delivered": "order_delivered",
+        "Returned to Sender": "shipment_needs_attention",
+        "Cancelled": "order_cancelled",
+        "Pending Pickup": "order_created",
+        "Parcel Measurements Update": "order_updated",
+    }
+
     def post(self, request: Request):
         """
         Receive and process tracker status updates from carrier webhooks.
         """
         print("Received webhook payload:============", request.data)  # Debug log
 
+        print("TrackerWebhookListener:============")  # Debug log
         serializer = serializers.WebhookPayload(data=request.data)
         if not serializer.is_valid():
             return Response(
@@ -385,26 +395,34 @@ class TrackerWebhookListener(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
             if carrier_name == webhook.description:
-                new_status = serializer.validated_data.get('status')
+                original_status = serializer.validated_data.get('status')
+                new_status = self.STATUS_MAPPING.get(original_status, "")
                 shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
-                tracker.status = new_status
+                tracker.status = original_status
                 tracker.reference = shipper_order_ref_number
                 tracker.updated_at = timezone.now()
                 updated_events = []
                 for event in tracker.events:
-                    event['code'] = new_status
+                    event['code'] = original_status
                     updated_events.append(event)
-                    tracker.events = updated_events
+                tracker.events = updated_events
                 tracker.save()
 
-                forward_url = webhook.url
-                print("Forwarding data to: ", request.data, " to ", forward_url)  # Debug log
-                response = requests.post(forward_url, json=request.data)
-                if response.status_code == 200:
-                    return Response({"status": "received"}, status=status.HTTP_200_OK)
+                # Return an empty string if no mapped status is found
+                if new_status != "":
+                    forward_url = webhook.url
+                    request.data['status'] = new_status
+                    print("Forwarding data to: ", request.data, " to ", forward_url)
+                    response = requests.post(forward_url, json=request.data)
+                    if response.status_code == 200:
+                        return Response({"status": "forward succesfull"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
-
+                    return Response(
+                        {"status": "received from carrier"},
+                        status=status.HTTP_200_OK,
+                    )
             return Response(
                 {"message": "Webhook processed successfully"},
                 status=status.HTTP_200_OK,
