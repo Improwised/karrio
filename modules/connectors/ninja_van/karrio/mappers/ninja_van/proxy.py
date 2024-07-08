@@ -24,7 +24,7 @@ class Proxy(proxy.Proxy):
             #         "Authorization": f"Bearer {self.settings.access_token}",
             #     },
             # )
-        custom_response = json.dumps({"data": {"total_fee": 90000}})
+        custom_response = json.dumps({"data": {"total_fee": 10}})
         return lib.Deserializable(custom_response, lib.to_dict)
 
     def create_shipment(self, request: lib.Serializable) -> lib.Deserializable[str]:
@@ -111,7 +111,3 @@ class Proxy(proxy.Proxy):
             return response.content
         else:
             raise ValueError("Failed to retrieve PDF")
-
-    def webhook_listener(self, request: lib.Serializable) -> lib.Deserializable[str]:
-        print("Webhook received")
-        return lib.Deserializable(request.serialize(), lib.to_dict)

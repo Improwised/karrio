@@ -289,6 +289,7 @@ class Rating:
         """
         logger.debug(f"fetch shipment rates. payload: {lib.to_json(args)}")
         payload = lib.to_object(models.RateRequest, lib.to_dict(args))
+        
         def action(gateways: typing.List[gateway.Gateway]):
             def process(gateway: gateway.Gateway):
                 is_valid, abortion = check_operation(
