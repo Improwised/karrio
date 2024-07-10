@@ -358,12 +358,10 @@ class TrackerWebhookListener(APIView):
     throttle_scope = "carrier_request"
 
     STATUS_MAPPING = {
-        "Picked Up": "shipment_out_for_delivery",
-        "Delivered": "order_delivered",
-        "Returned to Sender": "shipment_needs_attention",
-        "Cancelled": "order_cancelled",
-        "Pending Pickup": "order_created",
-        "Parcel Measurements Update": "order_updated",
+        "Picked Up": "Out for Delivery",
+        "Delivered": "Delivered",
+        "Returned to Sender": "Undelivered",
+        "Pending Pickup": "Packing",
     }
 
     def post(self, request: Request):
