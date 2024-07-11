@@ -2,7 +2,7 @@ import io
 import base64
 import logging
 import django_downloadview
-import karrio.lib as lib
+
 from django.db.models import Q
 from django.urls import path, re_path
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,9 +12,7 @@ from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
-from karrio.server.events import models as event_models
-import karrio.core.models as trackmodels
-from django.utils import timezone
+
 from karrio.server.core.views.api import GenericAPIView, APIView
 from karrio.server.manager.router import router
 import karrio.server.manager.serializers as serializers
@@ -22,8 +20,6 @@ import karrio.server.core.dataunits as dataunits
 import karrio.server.manager.models as models
 import karrio.server.core.filters as filters
 import karrio.server.openapi as openapi
-from karrio.server.events.task_definitions.base.webhook import notify_subscribers
-import requests
 
 ENDPOINT_ID = "$$$$$$"  # This endpoint id is used to make operation ids unique make sure not to duplicate
 logger = logging.getLogger(__name__)
@@ -354,92 +350,7 @@ class TrackerDocs(django_downloadview.VirtualDownloadView):
 
         return ContentFile(buffer.getvalue(), name=self.name)
 
-class TrackerWebhookListener(APIView):
-    throttle_scope = "carrier_request"
 
-    STATUS_MAPPING = {
-        "Picked Up": "Out for Delivery",
-        "Delivered": "Delivered",
-        "Returned to Sender": "Undelivered",
-        "Pending Pickup": "Packing",
-    }
-
-    def post(self, request: Request):
-        """
-        Receive and process tracker status updates from carrier webhooks.
-        """
-        print("Received webhook payload:============", request.data)  # Debug log
-
-        print("TrackerWebhookListener:============")  # Debug log
-        serializer = serializers.WebhookPayload(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                {"error": "Invalid payload", "details": serializer.errors},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        print("Serializer:============", serializer.validated_data.get('tracking_id'))  # Debug log
-        try:
-            tracker = models.Tracking.access_by(request).get(
-                Q(tracking_number=serializer.validated_data.get('tracking_id'))
-            )
-            print("Tracker:============", tracker)  # Debug log
-            # get me the carrier name from the tracker
-            carrier_name = tracker.carrier_name
-
-            webhook = event_models.Webhook.access_by(request).get(description=carrier_name)
-            if not webhook:
-                return Response(
-                    {"error": "Webhook not found"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            if carrier_name == webhook.description:
-                original_status = serializer.validated_data.get('status')
-                new_status = self.STATUS_MAPPING.get(original_status, "")
-                shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
-                tracker.status = original_status
-                tracker.reference = shipper_order_ref_number
-                tracker.updated_at = timezone.now()
-                updated_events = []
-                for event in tracker.events:
-                    event['code'] = original_status
-                    updated_events.append(event)
-                tracker.events = updated_events
-                tracker.save()
-
-                # Return an empty string if no mapped status is found
-                if new_status != "":
-                    forward_url = webhook.url
-                    request.data['status'] = new_status
-                    print("Forwarding data to: ", request.data, " to ", forward_url)
-                    response = requests.post(forward_url, json=request.data)
-                    if response.status_code == 200:
-                        return Response({"status": "forward succesfull"}, status=status.HTTP_200_OK)
-                    else:
-                        return Response({"status": "error", "message": "Failed to forward data"}, status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    return Response(
-                        {"status": "received from carrier"},
-                        status=status.HTTP_200_OK,
-                    )
-            return Response(
-                {"message": "Webhook processed successfully"},
-                status=status.HTTP_200_OK,
-            )
-
-        except Exception as e:
-            print(f"Error processing webhook: {str(e)}")
-            return Response(
-                {"error": "Internal server error", "details": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-router.urls.append(
-    path(
-        "trackers/webhook",
-        TrackerWebhookListener.as_view(),
-        name="tracker-webhook",
-    )
-)
 router.urls.append(path("trackers", TrackerList.as_view(), name="trackers-list"))
 router.urls.append(
     path(
