@@ -100,6 +100,7 @@ karrio.ups @ file://${PWD}/modules/connectors/ups
 karrio.usps @ file://${PWD}/modules/connectors/usps
 karrio.usps-international @ file://${PWD}/modules/connectors/usps_international
 karrio.zoom2u @ file://${PWD}/modules/connectors/zoom2u
+karrio.ninja_van @ file://${PWD}/modules/connectors/ninja_van
 lxml==4.9.4
 lxml-stubs==0.5.1
 MarkupPy==1.14
