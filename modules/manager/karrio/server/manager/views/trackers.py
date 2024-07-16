@@ -11,7 +11,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework import status
+from rest_framework import status, views
 from karrio.server.events import models as event_models
 import karrio.core.models as trackmodels
 from django.utils import timezone
@@ -354,7 +354,9 @@ class TrackerDocs(django_downloadview.VirtualDownloadView):
 
         return ContentFile(buffer.getvalue(), name=self.name)
 
-class TrackerWebhookListener(APIView):
+class TrackerWebhookListener(views.APIView):
+    authentication_classes = []  # No authentication
+    permission_classes = []  # No permissions
     throttle_scope = "carrier_request"
 
     STATUS_MAPPING = {
@@ -385,29 +387,36 @@ class TrackerWebhookListener(APIView):
             print("Tracker:============", tracker)  # Debug log
             # get me the carrier name from the tracker
             carrier_name = tracker.carrier_name
-
+            print("Carrier name:============", carrier_name)  # Debug log
             webhook = event_models.Webhook.access_by(request).get(description=carrier_name)
             if not webhook:
                 return Response(
                     {"error": "Webhook not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+            print("Webhook:============", webhook)  # Debug log
             if carrier_name == webhook.description:
                 original_status = serializer.validated_data.get('status')
+                print("original_status:============1", original_status)  # Debug log
                 new_status = self.STATUS_MAPPING.get(original_status, "")
+                print("new_status:============2", new_status)  # Debug log
                 shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
+                print("shipper_order_ref_number:============3", shipper_order_ref_number)  # Debug log
                 tracker.status = original_status
+                print("tracker.status:============4", tracker.status)  # Debug log
                 tracker.reference = shipper_order_ref_number
+                print("tracker.reference:============5", tracker.reference)  # Debug log
                 tracker.updated_at = timezone.now()
-                updated_events = []
-                for event in tracker.events:
-                    event['code'] = original_status
-                    updated_events.append(event)
-                tracker.events = updated_events
+                # updated_events = []
+                # for event in tracker.events:
+                #     event['code'] = original_status
+                #     updated_events.append(event)
+                # tracker.events = updated_events
                 tracker.save()
-
+                print("tracker:============6", tracker)  # Debug log
                 # Return an empty string if no mapped status is found
                 if new_status != "":
+                    print("new_status:============7", new_status)  # Debug log
                     forward_url = webhook.url
                     request.data['status'] = new_status
                     print("Forwarding data to: ", request.data, " to ", forward_url)
@@ -433,13 +442,6 @@ class TrackerWebhookListener(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-router.urls.append(
-    path(
-        "trackers/webhook",
-        TrackerWebhookListener.as_view(),
-        name="tracker-webhook",
-    )
-)
 router.urls.append(path("trackers", TrackerList.as_view(), name="trackers-list"))
 router.urls.append(
     path(
