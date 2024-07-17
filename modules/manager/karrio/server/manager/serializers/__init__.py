@@ -20,6 +20,7 @@ from karrio.server.manager.serializers.rate import RateSerializer
 from karrio.server.manager.serializers.tracking import (
     TrackingSerializer,
     TrackerUpdateData,
+    WebhookPayload,
     update_shipment_tracker,
     can_mutate_tracker,
 )
