@@ -1,6 +1,7 @@
 import io
 import base64
 import logging
+from pprint import pformat
 import django_downloadview
 import karrio.lib as lib
 from django.db.models import Q
@@ -365,6 +366,7 @@ class TrackerWebhookListener(views.APIView):
         "Returned to Sender": "Undelivered",
         "Pending Pickup": "Packing",
     }
+
     @openapi.extend_schema(
     tags=["Trackers"],
     operation_id=f"{ENDPOINT_ID}/trackers/webhook",
@@ -383,42 +385,42 @@ class TrackerWebhookListener(views.APIView):
         """
         Receive and process tracker status updates from carrier webhooks.
         """
-        print("Received webhook payload:============", request.data)  # Debug log
+        logger.debug(f"Received webhook payload: {pformat(request.data)}")
 
-        print("TrackerWebhookListener:============")  # Debug log
+        logger.debug(f"TrackerWebhookListener:============")  # Debug log
         serializer = serializers.WebhookPayload(data=request.data)
         if not serializer.is_valid():
             return Response(
                 {"error": "Invalid payload", "details": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        print("Serializer:============", serializer.validated_data.get('tracking_id'))  # Debug log
+        logger.debug("Serializer: {}".format(serializer.validated_data.get('tracking_id')))
         try:
             tracker = models.Tracking.access_by(request).get(
                 Q(tracking_number=serializer.validated_data.get('tracking_id'))
             )
-            print("Tracker:============", tracker)  # Debug log
+            logger.debug("Tracker: {}".format(tracker))  # Debug log
             # get me the carrier name from the tracker
             carrier_name = tracker.carrier_id
-            print("Carrier name:============", carrier_name)  # Debug log
+            logger.debug("Carrier name:============ {}".format(carrier_name))  # Debug log
             webhook = event_models.Webhook.access_by(request).get(description=carrier_name)
             if not webhook:
                 return Response(
                     {"error": "Webhook not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            print("Webhook:============", webhook)  # Debug log
+            logger.debug(f"1 Webhook: {webhook.description}, {webhook.url}")  # Debug log
             if carrier_name == webhook.description:
                 original_status = serializer.validated_data.get('status')
-                print("original_status:============1", original_status)  # Debug log
+                logger.debug(f"2 original_status: {original_status}")  # Debug log
                 new_status = self.STATUS_MAPPING.get(original_status, "")
-                print("new_status:============2", new_status)  # Debug log
+                logger.debug(f"3 new_status: {new_status}")  # Debug log
                 shipper_order_ref_number = serializer.validated_data.get('shipper_order_ref_no')
-                print("shipper_order_ref_number:============3", shipper_order_ref_number)  # Debug log
+                logger.debug(f"4 shipper_order_ref_number: {shipper_order_ref_number}")  # Debug log
                 tracker.status = original_status
-                print("tracker.status:============4", tracker.status)  # Debug log
+                logger.debug(f"5 tracker.status: {tracker.status}")
                 tracker.reference = shipper_order_ref_number
-                print("tracker.reference:============5", tracker.reference)  # Debug log
+                logger.debug(f"6 tracker.reference: {tracker.reference}")  # Debug log
                 tracker.updated_at = timezone.now()
                 # updated_events = []
                 # for event in tracker.events:
@@ -426,13 +428,13 @@ class TrackerWebhookListener(views.APIView):
                 #     updated_events.append(event)
                 # tracker.events = updated_events
                 tracker.save()
-                print("tracker:============6", tracker)  # Debug log
+                print(f"tracker:============6", tracker)  # Debug log
                 # Return an empty string if no mapped status is found
                 if new_status != "":
-                    print("new_status:============7", new_status)  # Debug log
+                    print(f"new_status:============7", new_status)  # Debug log
                     forward_url = webhook.url
                     request.data['status'] = new_status
-                    print("Forwarding data to: ", request.data, " to ", forward_url)
+                    print(f"Forwarding data to: ", request.data, " to ", forward_url)
                     response = requests.post(forward_url, json=request.data)
                     if response.status_code == 200:
                         return Response({"status": "forward succesfull"}, status=status.HTTP_200_OK)
