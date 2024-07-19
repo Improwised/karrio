@@ -365,6 +365,19 @@ class TrackerWebhookListener(views.APIView):
         "Returned to Sender": "Undelivered",
         "Pending Pickup": "Packing",
     }
+    @openapi.extend_schema(
+    tags=["Trackers"],
+    operation_id=f"{ENDPOINT_ID}/trackers/webhook",
+    extensions={"x-operationId": "webhook"},
+    summary="Listen for carrier webhooks",
+    request=serializers.WebhookPayload(),
+        responses={
+            200: serializers.TrackingStatus(),
+            400: serializers.ErrorResponse(),
+            404: serializers.ErrorResponse(),
+            500: serializers.ErrorResponse(),
+        },
+    )
 
     def post(self, request: Request):
         """
@@ -386,7 +399,7 @@ class TrackerWebhookListener(views.APIView):
             )
             print("Tracker:============", tracker)  # Debug log
             # get me the carrier name from the tracker
-            carrier_name = tracker.carrier_name
+            carrier_name = tracker.carrier_id
             print("Carrier name:============", carrier_name)  # Debug log
             webhook = event_models.Webhook.access_by(request).get(description=carrier_name)
             if not webhook:
